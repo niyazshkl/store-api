@@ -1,0 +1,34 @@
+package com.codewithmosh.store.controllers;
+
+import com.codewithmosh.store.entities.User;
+import com.codewithmosh.store.repositories.UserRepository;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("users")
+public class UserControler {
+    private final UserRepository userRepository;
+
+    public UserControler(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    @GetMapping("")
+    public Iterable<User> getAllUsers(){
+        return userRepository.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUser(@PathVariable Long id){
+        User user =  userRepository.findById(id).orElse(null);
+        if (user==null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(user);
+    }
+
+}
