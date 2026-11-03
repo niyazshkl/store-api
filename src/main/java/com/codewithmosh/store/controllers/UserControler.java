@@ -7,6 +7,7 @@ import com.codewithmosh.store.entities.User;
 import com.codewithmosh.store.mappers.UserMapper;
 import com.codewithmosh.store.repositories.UserRepository;
 import lombok.AllArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -59,6 +60,14 @@ public class UserControler {
         UserDto userDto = userMapper.toDto(user);
 
         return ResponseEntity.ok(userDto);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable(name = "id") Long id){
+        User user = userRepository.findById(id).orElse(null);
+        if (user==null) return ResponseEntity.notFound().build();
+        userRepository.delete(user);
+        return ResponseEntity.noContent().build();
     }
 
 }
