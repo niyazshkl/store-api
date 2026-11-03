@@ -7,6 +7,7 @@ import com.codewithmosh.store.dtos.users.UserDto;
 import com.codewithmosh.store.entities.User;
 import com.codewithmosh.store.mappers.UserMapper;
 import com.codewithmosh.store.repositories.UserRepository;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -42,7 +43,7 @@ public class UserControler {
     }
 
     @PostMapping("")
-    public ResponseEntity<UserDto> registerUser(@RequestBody RegisterUserRequestDto registerUserRequestDto,
+    public ResponseEntity<UserDto> registerUser(@Valid @RequestBody RegisterUserRequestDto registerUserRequestDto,
                                                 UriComponentsBuilder uriComponentsBuilder){
         User user = userMapper.toEntity(registerUserRequestDto);
         userRepository.save(user);
