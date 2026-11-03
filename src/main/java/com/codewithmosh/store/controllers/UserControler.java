@@ -56,16 +56,6 @@ public class UserControler {
         UserDto userDto = userMapper.toDto(user);
         return ResponseEntity.created(uri).body(userDto); //.created returns 201
     }
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String,String>> validateHandlingErrors(MethodArgumentNotValidException exception){
-        Map<String, String> errors = new HashMap<>();
-        exception.getBindingResult().getFieldErrors().forEach(
-                error -> {
-                    errors.put(error.getField(), error.getDefaultMessage());
-                }
-        );
-        return ResponseEntity.badRequest().body(errors);
-    }
 
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable(name = "id") Long id,
