@@ -13,7 +13,6 @@ public class RegisterUserRequestDto{
     @Lowercase
     @Email(message = "Must be a valid email")
     private String email;
-    @Min(value = 6, message = "At least 6")
-    @Max(value = 25, message = "Max 25")
+    @Size(min = 6, max = 25, message = "Password must be between 6 and 25 characters")
     private String password;
 }
