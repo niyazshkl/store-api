@@ -1,10 +1,12 @@
 package com.codewithmosh.store.mappers;
 
 import com.codewithmosh.store.dtos.RegisterUserRequestDto;
+import com.codewithmosh.store.dtos.UpdateUserRequest;
 import com.codewithmosh.store.dtos.UserDto;
 import com.codewithmosh.store.entities.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring") //alows bean generation of a dymanic class implementation at runtime
 public interface UserMapper { //mapStruct automatically generates an implementation at runtime
@@ -12,4 +14,6 @@ public interface UserMapper { //mapStruct automatically generates an implementat
     UserDto toDto(User user);
 
     User toEntity(RegisterUserRequestDto registerUserRequestDto);
+
+    void update(UpdateUserRequest updateUserRequest, @MappingTarget User user);
 }
