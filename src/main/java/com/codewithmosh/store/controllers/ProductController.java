@@ -70,7 +70,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> updateProduct(@PathVariable Long id){
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id){
         Product product = productRepository.findById(id).orElse(null);
         if (product==null) return ResponseEntity.notFound().build();
         productRepository.delete(product);
