@@ -12,11 +12,14 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -43,6 +46,7 @@ public class UserControler {
     }
 
     @PostMapping("")
+    // MethodArgumentNotValidException
     public ResponseEntity<UserDto> registerUser(@Valid @RequestBody RegisterUserRequestDto registerUserRequestDto,
                                                 UriComponentsBuilder uriComponentsBuilder){
         User user = userMapper.toEntity(registerUserRequestDto);
@@ -52,6 +56,17 @@ public class UserControler {
         UserDto userDto = userMapper.toDto(user);
         return ResponseEntity.created(uri).body(userDto); //.created returns 201
     }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String,String>> validateHandlingErrors(MethodArgumentNotValidException exception){
+        Map<String, String> errors = new HashMap<>();
+        exception.getBindingResult().getFieldErrors().forEach(
+                error -> {
+                    errors.put(error.getField(), error.getDefaultMessage());
+                }
+        );
+        return ResponseEntity.badRequest().body(errors);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable(name = "id") Long id,
                               @RequestBody UpdateUserRequest updateUserRequest){
