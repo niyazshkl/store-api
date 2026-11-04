@@ -2,6 +2,8 @@ package com.codewithmosh.store.entities;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "cart_items")
 public class CartItem {
@@ -20,5 +22,9 @@ public class CartItem {
 
     @Column(name = "quantity")
     private Integer quantity;
+
+    public BigDecimal getCartItemPrice(){
+        return product.getPrice().multiply(BigDecimal.valueOf(this.quantity));
+    }
 
 }
