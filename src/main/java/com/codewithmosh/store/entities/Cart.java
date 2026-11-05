@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -24,7 +25,7 @@ public class Cart {
     @Column(name = "date_created", insertable = false, updatable = false)
     private Date dateCreated;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, fetch = FetchType.EAGER,orphanRemoval = true)
     private Set<CartItem> items = new HashSet<>();
 
     public BigDecimal getTotalPrice() {
@@ -67,13 +68,27 @@ public class Cart {
     }
 
     public CartItem updateCartItem(Product product, Integer quantity){
-        CartItem item = this.items.stream()
-                .filter(cartItem ->
-                   cartItem.getProduct().equals(product)
-                ).findFirst().orElse(null);
+        CartItem item = getCartItemWithProduct(product);
         if (item==null) return null;
         item.setQuantity(quantity);
         return item;
     }
+
+    private CartItem getCartItemWithProduct(Product product) {
+        CartItem item = this.items.stream()
+                .filter(cartItem ->
+                   cartItem.getProduct().equals(product)
+                ).findFirst().orElse(null);
+        return item;
+    }
+
+    public CartItem removeProduct(Product product){
+        CartItem item = getCartItemWithProduct(product);
+        if (item==null) return null;
+        items.remove(item);
+        item.setCart(null);
+        return item;
+    }
+
 
 }
