@@ -90,5 +90,9 @@ public class Cart {
         return item;
     }
 
+    public void clear(){
+        this.items.clear();
+    }
+
 
 }
