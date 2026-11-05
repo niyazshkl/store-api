@@ -12,11 +12,13 @@ import com.codewithmosh.store.repositories.CartRepository;
 import com.codewithmosh.store.repositories.ProductRepository;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -66,19 +68,27 @@ public class CartController {
     }
 
     @PutMapping("/{cartId}/items/{productId}")
-    public ResponseEntity<CartItemDto> updateCartItem
+    public ResponseEntity<?> updateCartItem
             (@PathVariable(name = "cartId") UUID cartId,
              @PathVariable(name = "productId") Long productId,
              @Valid @RequestBody UpdateCartItemRequestDto updateCartItemRequestDto){
         Cart cart = cartRepository.getCartWithItems(cartId).orElse(null);
-        if (cart==null) return ResponseEntity.notFound().build();
+        if (cart==null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                Map.of("Error","Cart not found")
+        );
 
         Product product = productRepository.findById(productId).orElse(null);
-        if (product==null) return ResponseEntity.notFound().build();
+        if (product==null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                Map.of("Error","Product not found")
+        );
 
         Integer updated_quantity = updateCartItemRequestDto.getQuantity();
 
         CartItem cartItem = cart.updateCartItem(product, updated_quantity);
+        if (cartItem ==null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                Map.of("Error","CartItem containing the product not found")
+        );
+
         cartRepository.save(cart);
 
         CartItemDto cartItemDto = cartMapper.toDto(cartItem);

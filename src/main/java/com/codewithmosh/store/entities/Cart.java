@@ -71,7 +71,7 @@ public class Cart {
                 .filter(cartItem ->
                    cartItem.getProduct().equals(product)
                 ).findFirst().orElse(null);
-        if (item==null) return addProductToNewCartItem(product);
+        if (item==null) return null;
         item.setQuantity(quantity);
         return item;
     }
