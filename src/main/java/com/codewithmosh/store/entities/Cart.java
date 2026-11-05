@@ -94,5 +94,12 @@ public class Cart {
         this.items.clear();
     }
 
+    public CartItem getCartItem(Long id){
+        CartItem item = this.items.stream().filter(
+                cartItem -> cartItem.getId()==id
+        ).findFirst().orElse(null);
+        return item;
+    }
+
 
 }
