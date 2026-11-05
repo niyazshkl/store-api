@@ -1,4 +1,4 @@
-package com.codewithmosh.store.exceptions;
+package com.codewithmosh.store.exceptions.cart;
 
 public class ProductNotFoundException extends RuntimeException{
 }
