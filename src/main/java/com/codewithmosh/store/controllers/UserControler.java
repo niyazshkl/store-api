@@ -5,8 +5,10 @@ import com.codewithmosh.store.dtos.users.RegisterUserRequestDto;
 import com.codewithmosh.store.dtos.users.UpdateUserRequest;
 import com.codewithmosh.store.dtos.users.UserDto;
 import com.codewithmosh.store.entities.User;
+import com.codewithmosh.store.exceptions.EmailAlreadyExists;
 import com.codewithmosh.store.mappers.UserMapper;
 import com.codewithmosh.store.repositories.UserRepository;
+import com.codewithmosh.store.services.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -28,6 +30,8 @@ import java.util.Set;
 public class UserControler {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final UserService userService;
+
     @GetMapping("")
     public Iterable<UserDto> getAllUsers(@RequestParam(required = false, defaultValue = "", name = "sort") String sortBy){
         Set<String> validNames = new HashSet<>();
@@ -49,15 +53,8 @@ public class UserControler {
     // MethodArgumentNotValidException
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterUserRequestDto registerUserRequestDto,
                                                 UriComponentsBuilder uriComponentsBuilder){
-        if (userRepository.existsByEmail(registerUserRequestDto.getEmail()))
-            return ResponseEntity.badRequest().body(
-                    Map.of("email", "Email is already registered")
-            );
-        User user = userMapper.toEntity(registerUserRequestDto);
-        userRepository.save(user);
-        System.out.println(user);
-        URI uri = uriComponentsBuilder.path("/users/{id}").buildAndExpand(user.getId()).toUri();
-        UserDto userDto = userMapper.toDto(user);
+        UserDto userDto = userService.registerUser(registerUserRequestDto.getName(), registerUserRequestDto.getEmail(), registerUserRequestDto.getPassword());
+        URI uri = uriComponentsBuilder.path("/users/{id}").buildAndExpand(userDto.getId()).toUri();
         return ResponseEntity.created(uri).body(userDto); //.created returns 201
     }
 
@@ -89,6 +86,13 @@ public class UserControler {
         user.setPassword(changePasswordRequestDto.getNewPassword());
         userRepository.save(user);
         return ResponseEntity.noContent().build();
+    }
+
+    @ExceptionHandler(EmailAlreadyExists.class)
+    public ResponseEntity<Map<String, String>> handleEmailAlreadyExists(EmailAlreadyExists exception){
+        return ResponseEntity.badRequest().body(
+                Map.of("email", "Email is already registered")
+        );
     }
 
 }
