@@ -34,6 +34,14 @@ public class CartController {
         return ResponseEntity.created(uri).body(cartMapper.toDto(cart));
     }
 
+    @GetMapping("/{cartId}")
+    public ResponseEntity<CartDto> getCart(@PathVariable(name = "cartId") UUID cartId){
+        Cart cart = cartRepository.findById(cartId).orElse(null);
+        if (cart==null) return ResponseEntity.notFound().build();
+        CartDto cartDto = cartMapper.toDto(cart);
+        return ResponseEntity.ok(cartDto);
+    }
+
     @PostMapping("/{cartId}/items")
     public ResponseEntity<CartItemDto> addProductToCart(@PathVariable(name = "cartId") UUID cartId,
                                                   @Valid @RequestBody AddItemToCartRequest addItemToCartRequest,

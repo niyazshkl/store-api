@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Entity
 @NoArgsConstructor
@@ -25,16 +24,16 @@ public class Cart {
     private Date dateCreated;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.MERGE)
-    private Set<CartItem> cartItems = new HashSet<>();
+    private Set<CartItem> items = new HashSet<>();
 
     public BigDecimal getTotalPrice() {
-        return cartItems.stream()
+        return items.stream()
                 .map(CartItem::getCartItemPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public CartItem addProduct(Product product){
-        for (CartItem cartItem: cartItems) {
+        for (CartItem cartItem: items) {
             if (cartItem.getProduct().getId()==product.getId()){
                 cartItem.setQuantity(cartItem.getQuantity()+1);
                 return cartItem;
@@ -55,7 +54,7 @@ public class Cart {
         CartItem cartItem = new CartItem();
         cartItem.setProduct(product);
         cartItem.setQuantity(1);
-        this.cartItems.add(cartItem);
+        this.items.add(cartItem);
         cartItem.setCart(this);
         return cartItem;
         //cartItemRepostory.save() -> just use cascade = CascadeType.PERSIST
