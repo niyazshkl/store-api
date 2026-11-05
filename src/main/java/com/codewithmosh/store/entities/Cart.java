@@ -3,6 +3,7 @@ package com.codewithmosh.store.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.NonNull;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -51,12 +52,28 @@ public class Cart {
 //        });
 //        if (found.get()) return;
 
+        return addProductToNewCartItem(product);
+        //cartItemRepostory.save() -> just use cascade = CascadeType.PERSIST
+    }
+
+    @NonNull
+    private CartItem addProductToNewCartItem(Product product) {
         CartItem cartItem = new CartItem();
         cartItem.setProduct(product);
         cartItem.setQuantity(1);
         this.items.add(cartItem);
         cartItem.setCart(this);
         return cartItem;
-        //cartItemRepostory.save() -> just use cascade = CascadeType.PERSIST
     }
+
+    public CartItem updateCartItem(Product product, Integer quantity){
+        CartItem item = this.items.stream()
+                .filter(cartItem ->
+                   cartItem.getProduct().equals(product)
+                ).findFirst().orElse(null);
+        if (item==null) return addProductToNewCartItem(product);
+        item.setQuantity(quantity);
+        return item;
+    }
+
 }

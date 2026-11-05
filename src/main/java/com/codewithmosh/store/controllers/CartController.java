@@ -3,6 +3,7 @@ package com.codewithmosh.store.controllers;
 import com.codewithmosh.store.dtos.carts.AddItemToCartRequest;
 import com.codewithmosh.store.dtos.carts.CartDto;
 import com.codewithmosh.store.dtos.carts.CartItemDto;
+import com.codewithmosh.store.dtos.carts.UpdateCartItemRequestDto;
 import com.codewithmosh.store.entities.Cart;
 import com.codewithmosh.store.entities.CartItem;
 import com.codewithmosh.store.entities.Product;
@@ -63,4 +64,26 @@ public class CartController {
                 .toUri();
         return ResponseEntity.created(uri).body(cartItemDto);
     }
+
+    @PutMapping("/{cartId}/items/{productId}")
+    public ResponseEntity<CartItemDto> updateCartItem
+            (@PathVariable(name = "cartId") UUID cartId,
+             @PathVariable(name = "productId") Long productId,
+             @Valid @RequestBody UpdateCartItemRequestDto updateCartItemRequestDto){
+        Cart cart = cartRepository.getCartWithItems(cartId).orElse(null);
+        if (cart==null) return ResponseEntity.notFound().build();
+
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product==null) return ResponseEntity.notFound().build();
+
+        Integer updated_quantity = updateCartItemRequestDto.getQuantity();
+
+        CartItem cartItem = cart.updateCartItem(product, updated_quantity);
+        cartRepository.save(cart);
+
+        CartItemDto cartItemDto = cartMapper.toDto(cartItem);
+
+        return ResponseEntity.ok(cartItemDto);
+    }
+
 }

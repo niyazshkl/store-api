@@ -36,4 +36,8 @@ public class CartItem {
         return product.getPrice().multiply(BigDecimal.valueOf(this.quantity));
     }
 
+    public Long getProductId(){
+        return this.product.getId();
+    }
+
 }
