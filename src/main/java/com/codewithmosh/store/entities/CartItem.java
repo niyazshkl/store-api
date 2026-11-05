@@ -1,11 +1,20 @@
 package com.codewithmosh.store.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "cart_items")
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
