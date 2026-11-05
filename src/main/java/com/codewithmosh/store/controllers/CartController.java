@@ -10,6 +10,9 @@ import com.codewithmosh.store.entities.Product;
 import com.codewithmosh.store.mappers.CartMapper;
 import com.codewithmosh.store.repositories.CartRepository;
 import com.codewithmosh.store.repositories.ProductRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,12 +27,14 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/carts")
 @AllArgsConstructor
+@Tag(name = "Carts") //swaggerUI decorator
 public class CartController {
     private final CartMapper cartMapper;
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
 
     @PostMapping
+    @Operation(summary = "Create a new cart") //swaggerUI decorator
     public ResponseEntity<CartDto> createCart(UriComponentsBuilder uriComponentsBuilder){
         Cart cart = new Cart();
         cartRepository.save(cart);
@@ -38,7 +43,10 @@ public class CartController {
     }
 
     @GetMapping("/{cartId}")
-    public ResponseEntity<CartDto> getCart(@PathVariable(name = "cartId") UUID cartId){
+    @Operation(summary = "Find an existing cart")
+    public ResponseEntity<CartDto> getCart(
+            @Parameter(description = "The UUID of the cart") //swaggerUI decorator
+            @PathVariable(name = "cartId") UUID cartId){
         Cart cart = cartRepository.getCartWithItems(cartId).orElse(null);
         if (cart==null) return ResponseEntity.notFound().build();
         CartDto cartDto = cartMapper.toDto(cart);
