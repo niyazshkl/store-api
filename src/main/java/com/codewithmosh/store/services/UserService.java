@@ -2,7 +2,7 @@ package com.codewithmosh.store.services;
 
 import com.codewithmosh.store.dtos.users.UserDto;
 import com.codewithmosh.store.entities.User;
-import com.codewithmosh.store.exceptions.EmailAlreadyExists;
+import com.codewithmosh.store.exceptions.auth.EmailAlreadyExists;
 import com.codewithmosh.store.mappers.UserMapper;
 import com.codewithmosh.store.repositories.UserRepository;
 import lombok.AllArgsConstructor;
