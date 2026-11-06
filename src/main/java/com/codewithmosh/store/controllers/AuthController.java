@@ -7,12 +7,11 @@ import com.codewithmosh.store.dtos.users.UserDto;
 import com.codewithmosh.store.entities.User;
 import com.codewithmosh.store.mappers.UserMapper;
 import com.codewithmosh.store.repositories.UserRepository;
+import com.codewithmosh.store.services.Jwt;
 import com.codewithmosh.store.services.JwtService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -51,12 +50,12 @@ public class AuthController {
         User user = userRepository.findByEmail(loginRequest.getEmail()).orElse(null);
         if (user==null) return ResponseEntity.badRequest().build(); //should never happen because authenticationManager should be throwing and we never get here then
 
-        String accessToken = jwtService.generateAccessToken(user);
-        String refershToken = jwtService.generateRefreshToken(user);
+        Jwt accessToken = jwtService.generateAccessToken(user);
+        Jwt refershToken = jwtService.generateRefreshToken(user);
 
 
 
-        Cookie cookie = new Cookie("refreshToken", refershToken);
+        Cookie cookie = new Cookie("refreshToken", refershToken.toString());
         cookie.setHttpOnly(true); //cannot be accessed by js
         cookie.setPath("/auth/refresh"); //where cookie can be sent to
         cookie.setMaxAge(jwtConfig.getRefreshTokenExpirationInSeconds()); //7 days (copied from jwtService::generateRefreshToken)
@@ -65,28 +64,37 @@ public class AuthController {
         response.addCookie(cookie);
 
 
-        return ResponseEntity.ok(new JwtResponse(accessToken));
+        return ResponseEntity.ok(new JwtResponse(accessToken.toString()));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<JwtResponse> refreshAccessToken(
             @CookieValue(value = "refreshToken") String refreshToken
     ){
-        if (!jwtService.validateToken(refreshToken)){
-            return ResponseEntity.badRequest().build();
+        try {
+            Jwt jwt = jwtService.parse(refreshToken);
+            if (!jwt.isUnexpired()) return ResponseEntity.badRequest().build();
+            Long userId = Long.valueOf(jwt.getSubject().toString());
+            User user = userRepository.findById(userId).orElseThrow(); //maybe user was deleted from the table in the schema
+            Jwt refreshedAccessToken = jwtService.generateAccessToken(user);
+            return ResponseEntity.ok(new JwtResponse(refreshedAccessToken.toString()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        Long userId = Long.valueOf(jwtService.getSubject(refreshToken));
-        User user = userRepository.findById(userId).orElseThrow(); //maybe user was deleted from the table in the schema
-        String refreshedAccessToken = jwtService.generateAccessToken(user);
-        return ResponseEntity.ok(new JwtResponse(refreshedAccessToken));
     }
 
     @PostMapping("/validate")
     public ResponseEntity<Void> validateJwt(@RequestHeader(name = "Authorization") String token){
         token = token.replace("Bearer ", "");
-        boolean valid =jwtService.validateToken(token);
-        if (valid) return ResponseEntity.ok().build();
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        Jwt jwt = null;
+        try {
+            jwt = jwtService.parse(token);
+            boolean valid = jwt.isUnexpired();
+            if (valid) return ResponseEntity.ok().build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @GetMapping("/me")
