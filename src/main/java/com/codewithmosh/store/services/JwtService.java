@@ -28,6 +28,13 @@ public class JwtService {
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + secondsInOneday * 1000));
 
+
+        //add custom claims
+        jwtBuilder.claim("name", user.getName())
+                .claim("email", user.getEmail());
+
+
+
         //now we will sign it before building the jwt token
         //but we need a key
         Key secretKey = getSecretKey();
