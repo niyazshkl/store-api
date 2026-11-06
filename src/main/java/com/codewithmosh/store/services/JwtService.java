@@ -66,9 +66,14 @@ public class JwtService {
         return claims;
     }
 
-
-
-
-
+    public String getSubject(String token){
+        try {
+            Claims claims = parse(token);
+            return claims.getSubject();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 }
