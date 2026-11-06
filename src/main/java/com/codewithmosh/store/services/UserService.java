@@ -1,6 +1,7 @@
 package com.codewithmosh.store.services;
 
 import com.codewithmosh.store.dtos.users.UserDto;
+import com.codewithmosh.store.entities.Role;
 import com.codewithmosh.store.entities.User;
 import com.codewithmosh.store.exceptions.auth.EmailAlreadyExists;
 import com.codewithmosh.store.mappers.UserMapper;
@@ -23,6 +24,7 @@ public class UserService {
         user.setName(name);
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
+        user.setRole(Role.USER);
         userRepository.save(user);
         System.out.println(user);
         UserDto userDto = userMapper.toDto(user);

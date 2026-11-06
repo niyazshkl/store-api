@@ -31,7 +31,8 @@ public class JwtService {
 
         //add custom claims
         jwtBuilder.claim("name", user.getName())
-                .claim("email", user.getEmail());
+                  .claim("email", user.getEmail())
+                  .claim("role", user.getRole());
 
         //now we will sign it before building the jwt token
         //but we need a key
