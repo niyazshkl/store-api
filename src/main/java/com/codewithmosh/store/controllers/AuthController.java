@@ -68,6 +68,19 @@ public class AuthController {
         return ResponseEntity.ok(new JwtResponse(accessToken));
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<JwtResponse> refreshAccessToken(
+            @CookieValue(value = "refreshToken") String refreshToken
+    ){
+        if (!jwtService.validateToken(refreshToken)){
+            return ResponseEntity.badRequest().build();
+        }
+        Long userId = Long.valueOf(jwtService.getSubject(refreshToken));
+        User user = userRepository.findById(userId).orElseThrow(); //maybe user was deleted from the table in the schema
+        String refreshedAccessToken = jwtService.generateAccessToken(user);
+        return ResponseEntity.ok(new JwtResponse(refreshedAccessToken));
+    }
+
     @PostMapping("/validate")
     public ResponseEntity<Void> validateJwt(@RequestHeader(name = "Authorization") String token){
         token = token.replace("Bearer ", "");

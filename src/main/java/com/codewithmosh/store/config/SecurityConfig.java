@@ -2,9 +2,11 @@ package com.codewithmosh.store.config;
 
 import com.codewithmosh.store.filters.JwtFilter;
 import lombok.AllArgsConstructor;
+import org.springdoc.core.customizers.DataRestDelegatingMethodParameterCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -18,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration //marks as a bean so IOC container can create an instance
@@ -27,7 +30,7 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final JwtFilter jwtFilter;
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception { //SecurityFilterChain interface defines how HTTP requests are secure
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, DataRestDelegatingMethodParameterCustomizer dataRestDelegatingMethodParameterCustomizer) throws Exception { //SecurityFilterChain interface defines how HTTP requests are secure
         /*
         HttpSecurity is a builder object. Specify three things before building the SecurityFilterChain object
         1. Stateless session (token based, not session based authentication)
@@ -43,7 +46,12 @@ public class SecurityConfig {
                                   .requestMatchers(HttpMethod.POST,"/users").permitAll()
                                   .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                                   .requestMatchers(HttpMethod.POST, "/auth/validate").permitAll()
+                                  .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
                                   .anyRequest().authenticated()
+                )
+                .exceptionHandling(
+                        customizer->
+                                customizer.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
