@@ -42,7 +42,11 @@ public class AuthController {
                                         (loginRequest.getEmail(), loginRequest.getPassword());
 
         authenticationManager.authenticate(authentication); //throws BadCredentialsException at runtime.
-        String token = jwtService.generateToken(loginRequest.getEmail());
+
+        User user = userRepository.findByEmail(loginRequest.getEmail()).orElse(null);
+        if (user==null) return ResponseEntity.badRequest().build(); //should never happen because authenticationManager should be throwing and we never get here then
+
+        String token = jwtService.generateToken(user);
         return ResponseEntity.ok(new JwtResponse(token));
     }
 
@@ -58,9 +62,9 @@ public class AuthController {
     public ResponseEntity<UserDto> me(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        String email = (String) authentication.getPrincipal(); //we know because we set this
+        Long userId = Long.valueOf(authentication.getPrincipal().toString()); //we know because we set this
 
-        User user = userRepository.findByEmail(email).orElse(null);
+        User user = userRepository.findById(userId).orElse(null);
 
         //if user not found -> someone got a valid jwtToken without being registered in the users table in store_api schema
         if (user==null) return ResponseEntity.notFound().build();

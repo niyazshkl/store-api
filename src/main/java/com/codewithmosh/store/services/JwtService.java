@@ -1,5 +1,6 @@
 package com.codewithmosh.store.services;
 
+import com.codewithmosh.store.entities.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.validation.Payload;
@@ -19,11 +20,11 @@ public class JwtService {
     private String secret;
 
 
-    public String generateToken(String email){
+    public String generateToken(User user){
         JwtBuilder jwtBuilder = Jwts.builder();
         //below is just setting differnt fields inside payload
         long secondsInOneday = 86400;
-        jwtBuilder.subject(email)
+        jwtBuilder.subject(user.getId().toString())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + secondsInOneday * 1000));
 
