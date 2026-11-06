@@ -8,12 +8,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @AllArgsConstructor
@@ -71,11 +73,12 @@ public class JwtFilter extends OncePerRequestFilter {
         lets fetch the user so that security context knowns who it is.
         allowing access to protected endpoints
          */
-
+        String role = jwtService.getRole(token);
+        String subject = jwtService.getSubject(token);
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                jwtService.getSubject(token),
+                subject,
                 null, //no need for authenticated user!
-                null //no roles/permission for now
+                List.of(new SimpleGrantedAuthority("ROLE_" + role)) //no roles/permission for now
         );
 
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request)); //this is boiler-plate code: basically it adds some meta addres like IP address to authentication object

@@ -1,5 +1,6 @@
 package com.codewithmosh.store.config;
 
+import com.codewithmosh.store.entities.Role;
 import com.codewithmosh.store.filters.JwtFilter;
 import lombok.AllArgsConstructor;
 import org.springdoc.core.customizers.DataRestDelegatingMethodParameterCustomizer;
@@ -36,6 +37,7 @@ public class SecurityConfig {
         1. Stateless session (token based, not session based authentication)
         2. Disable CSRF (an attack where the browser can send requests on the user's behalf without the user's knowledge)
         3. Specifying which endpoints are public/authorized
+        Remember at this state, all authorization decisions made are directly from SecurityContextHolder (set in custom auth filter)
          */
         httpSecurity.sessionManagement(
                 customizer->
@@ -44,6 +46,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(customizer ->
                         customizer.requestMatchers("/carts/**").permitAll()
                                   .requestMatchers(HttpMethod.POST,"/users").permitAll()
+                                  .requestMatchers("/admin/**").hasRole(Role.ADMIN.name())
                                   .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                                   .requestMatchers(HttpMethod.POST, "/auth/validate").permitAll()
                                   .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
@@ -51,7 +54,12 @@ public class SecurityConfig {
                 )
                 .exceptionHandling(
                         customizer->
-                                customizer.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                        {
+                                customizer.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+                                customizer.accessDeniedHandler((request, response, accessDeniedException) -> {
+                                    response.setStatus(HttpStatus.FORBIDDEN.value());
+                                });
+                        }
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();

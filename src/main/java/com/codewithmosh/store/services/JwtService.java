@@ -44,6 +44,15 @@ public class JwtService {
         return jwtToken;
     }
 
+    public String getRole(String token){
+        try {
+            Claims claims = parse(token);
+            return (String) claims.get("role");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public boolean validateToken(String token){
         Claims claims = null;
         try {
