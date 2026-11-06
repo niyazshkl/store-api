@@ -1,5 +1,6 @@
 package com.codewithmosh.store.controllers;
 
+import com.codewithmosh.store.config.JwtConfig;
 import com.codewithmosh.store.dtos.auth.JwtResponse;
 import com.codewithmosh.store.dtos.auth.RequestLoginDto;
 import com.codewithmosh.store.dtos.users.UserDto;
@@ -7,7 +8,11 @@ import com.codewithmosh.store.entities.User;
 import com.codewithmosh.store.mappers.UserMapper;
 import com.codewithmosh.store.repositories.UserRepository;
 import com.codewithmosh.store.services.JwtService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,20 +22,20 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController //Serialize/Deserialization between Java objects and JSON
 @RequestMapping("/auth")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final JwtConfig jwtConfig;
 
     @PostMapping("/login")
-    public ResponseEntity<JwtResponse> login(@RequestBody RequestLoginDto loginRequest){
+    public ResponseEntity<JwtResponse> login(@RequestBody RequestLoginDto loginRequest,
+                                             HttpServletResponse response){
         /*
         Authenticate credentials
         If valid, return a token which the user will return in future requests
@@ -46,8 +51,21 @@ public class AuthController {
         User user = userRepository.findByEmail(loginRequest.getEmail()).orElse(null);
         if (user==null) return ResponseEntity.badRequest().build(); //should never happen because authenticationManager should be throwing and we never get here then
 
-        String token = jwtService.generateToken(user);
-        return ResponseEntity.ok(new JwtResponse(token));
+        String accessToken = jwtService.generateAccessToken(user);
+        String refershToken = jwtService.generateRefreshToken(user);
+
+
+
+        Cookie cookie = new Cookie("refreshToken", refershToken);
+        cookie.setHttpOnly(true); //cannot be accessed by js
+        cookie.setPath("/auth/refresh"); //where cookie can be sent to
+        cookie.setMaxAge(jwtConfig.getRefreshTokenExpirationInSeconds()); //7 days (copied from jwtService::generateRefreshToken)
+        cookie.setSecure(true); //https only; http blocked
+
+        response.addCookie(cookie);
+
+
+        return ResponseEntity.ok(new JwtResponse(accessToken));
     }
 
     @PostMapping("/validate")

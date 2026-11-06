@@ -1,52 +1,46 @@
 package com.codewithmosh.store.services;
 
+import com.codewithmosh.store.config.JwtConfig;
 import com.codewithmosh.store.entities.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import jakarta.validation.Payload;
-import org.jspecify.annotations.Nullable;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
 @Service
-
+@AllArgsConstructor
 public class JwtService {
-    @Value("${spring.jwt.secret}")
-    private String secret;
+    private JwtConfig jwtConfig;
+    public String generateAccessToken(User user){
+        return generateJwt(user, jwtConfig.getAccessTokenExpirationInSeconds());
+    }
+    public String generateRefreshToken(User user){
+        return generateJwt(user, jwtConfig.getRefreshTokenExpirationInSeconds());
+    }
 
-
-    public String generateToken(User user){
+    private String generateJwt(User user, long expirationInSeconds) {
         JwtBuilder jwtBuilder = Jwts.builder();
-        //below is just setting differnt fields inside payload
-        long secondsInOneday = 86400;
         jwtBuilder.subject(user.getId().toString())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + secondsInOneday * 1000));
-
+                .expiration(new Date(System.currentTimeMillis() + expirationInSeconds * 1000));
 
         //add custom claims
         jwtBuilder.claim("name", user.getName())
                 .claim("email", user.getEmail());
 
-
-
         //now we will sign it before building the jwt token
         //but we need a key
-        Key secretKey = getSecretKey();
+        Key secretKey = jwtConfig.getSecretKey();
         jwtBuilder.signWith(secretKey);
 
         //now we are ready to build the jwt token -> compact() is basically build();
         String jwtToken = jwtBuilder.compact();
         return jwtToken;
-    }
-
-    private SecretKey getSecretKey(){
-        return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
     public boolean validateToken(String token){
@@ -63,7 +57,7 @@ public class JwtService {
 
     private Claims parse(String token) throws Exception {
         JwtParserBuilder parserBuilder = Jwts.parser();
-        JwtParser jwtParser = parserBuilder.verifyWith(getSecretKey()).build();
+        JwtParser jwtParser = parserBuilder.verifyWith(jwtConfig.getSecretKey()).build();
 
         //payload = collection of claims where claims are <String, Object>
         // claims -> payload
