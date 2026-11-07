@@ -27,7 +27,7 @@ public class Order {
     private OrderStatus status;
 
     @Column(name = "created_at", updatable = false ,insertable = false)
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
     @Column(name = "total_price")
     private BigDecimal totalPrice = BigDecimal.ZERO;
