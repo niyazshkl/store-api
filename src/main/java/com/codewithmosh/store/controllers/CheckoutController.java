@@ -7,6 +7,7 @@ import com.codewithmosh.store.exceptions.cart.CartNotFoundException;
 import com.codewithmosh.store.services.CheckoutService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,10 +22,15 @@ public class CheckoutController {
     @PostMapping
     public ResponseEntity<CheckoutResponseDto> checkout(
             @Valid @RequestBody RequestCheckoutDto requestCheckoutDto
-            ) throws Exception {
+            ) {
         UUID cartId = requestCheckoutDto.getCartId();
-        Long orderId = checkoutService.checkout(cartId);
-        return  ResponseEntity.ok(new CheckoutResponseDto(orderId));
+        CheckoutResponseDto checkoutResponseDto = null;
+        try {
+            checkoutResponseDto = checkoutService.checkout(cartId);
+            return  ResponseEntity.ok(checkoutResponseDto);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
     @ExceptionHandler(CartNotFoundException.class)
     public ResponseEntity<Map<String,String>> handleCartNotFound(CartNotFoundException exception){

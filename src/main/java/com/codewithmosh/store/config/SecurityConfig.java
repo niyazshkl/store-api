@@ -45,8 +45,9 @@ public class SecurityConfig {
                 .csrf(customizer->customizer.disable()) //step 2 is done
                 .authorizeHttpRequests(customizer ->
                         customizer
-//                                  .requestMatchers("/carts/**").permitAll()
+                                  .requestMatchers("/carts/**").permitAll()
                                   .requestMatchers(HttpMethod.POST,"/users").permitAll()
+                                  .requestMatchers("/users").hasRole(Role.ADMIN.name())
                                   .requestMatchers("/admin/**").hasRole(Role.ADMIN.name())
                                   .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                                   .requestMatchers(HttpMethod.POST, "/auth/validate").permitAll()
