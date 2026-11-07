@@ -44,7 +44,8 @@ public class SecurityConfig {
                 customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //step 1 is done
                 .csrf(customizer->customizer.disable()) //step 2 is done
                 .authorizeHttpRequests(customizer ->
-                        customizer.requestMatchers("/carts/**").permitAll()
+                        customizer
+//                                  .requestMatchers("/carts/**").permitAll()
                                   .requestMatchers(HttpMethod.POST,"/users").permitAll()
                                   .requestMatchers("/admin/**").hasRole(Role.ADMIN.name())
                                   .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()

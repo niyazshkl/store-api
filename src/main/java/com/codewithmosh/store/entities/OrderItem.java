@@ -1,10 +1,15 @@
 package com.codewithmosh.store.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @Entity
+@Getter
+@Setter
+@Table(name = "order_items")
 public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +30,10 @@ public class OrderItem {
     private Integer quantity;
 
     @Column(name = "total_price")
-    private BigDecimal total_price;
+    private BigDecimal totalPrice = BigDecimal.ZERO;
 
+    public void calculateTotalPrice() {
+        totalPrice = unitPrice.multiply(BigDecimal.valueOf(quantity));
+    }
 
 }

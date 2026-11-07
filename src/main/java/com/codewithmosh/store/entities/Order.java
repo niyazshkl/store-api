@@ -1,16 +1,22 @@
 package com.codewithmosh.store.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Getter
+@Setter
+@Table(name = "orders")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
@@ -24,8 +30,23 @@ public class Order {
     private LocalDateTime created_at;
 
     @Column(name = "total_price")
-    private BigDecimal totalPrice;
+    private BigDecimal totalPrice = BigDecimal.ZERO;
 
-    @OneToMany(mappedBy = "order")
-    private Set<OrderItem> items;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<OrderItem> items = new HashSet<>();
+
+    public void addOrderItem(OrderItem orderItem){
+        this.items.add(orderItem);
+        orderItem.setOrder(this);
+    }
+
+    public void calculteTotalPrice(){
+        items.stream().forEach(
+                orderItem -> {
+                    BigDecimal orderItemTotalPrice = orderItem.getTotalPrice();
+                    totalPrice = totalPrice.add(orderItemTotalPrice);
+//                    totalPrice.add(orderItem.getTotalPrice())
+                }
+        );
+    }
 }
