@@ -35,6 +35,25 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<OrderItem> items = new HashSet<>();
 
+    public static Order fromCart(Cart cart){
+
+        Order order = new Order();
+        order.setStatus(OrderStatus.PENDING);
+
+        for (CartItem cartItem: cart.getItems()){
+            OrderItem orderItem = new OrderItem();
+            orderItem.setProduct(cartItem.getProduct());
+            orderItem.setUnitPrice(cartItem.getProduct().getPrice());
+            orderItem.setQuantity(cartItem.getQuantity());
+            orderItem.calculateTotalPrice();
+            order.addOrderItem(orderItem);
+        }
+
+        order.calculteTotalPrice();
+
+        return order;
+    }
+
     public void addOrderItem(OrderItem orderItem){
         this.items.add(orderItem);
         orderItem.setOrder(this);

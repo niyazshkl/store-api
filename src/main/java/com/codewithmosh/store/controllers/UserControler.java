@@ -24,13 +24,13 @@ import java.util.Set;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("users")
+@RequestMapping("/users")
 public class UserControler {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final UserService userService;
 
-    @GetMapping("")
+    @GetMapping
     public Iterable<UserDto> getAllUsers(@RequestParam(required = false, defaultValue = "", name = "sort") String sortBy){
         Set<String> validNames = new HashSet<>();
         validNames.add("name");
@@ -47,7 +47,7 @@ public class UserControler {
         return ResponseEntity.ok(userMapper.toDto(user));
     }
 
-    @PostMapping("")
+    @PostMapping
     // MethodArgumentNotValidException
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterUserRequestDto registerUserRequestDto,
                                                 UriComponentsBuilder uriComponentsBuilder){
