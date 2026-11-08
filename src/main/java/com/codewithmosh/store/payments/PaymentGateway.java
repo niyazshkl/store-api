@@ -1,7 +1,6 @@
-package com.codewithmosh.store.services;
+package com.codewithmosh.store.payments;
 
 import com.codewithmosh.store.entities.Order;
-import com.codewithmosh.store.exceptions.PaymentException;
 
 import java.util.Map;
 import java.util.Optional;

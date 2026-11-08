@@ -1,4 +1,4 @@
-package com.codewithmosh.store.dtos.auth;
+package com.codewithmosh.store.auth;
 
 import lombok.Data;
 

@@ -1,4 +1,4 @@
-package com.codewithmosh.store.dtos.users;
+package com.codewithmosh.store.users;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;

@@ -1,14 +1,6 @@
-package com.codewithmosh.store.controllers;
+package com.codewithmosh.store.users;
 
-import com.codewithmosh.store.dtos.users.ChangePasswordRequestDto;
-import com.codewithmosh.store.dtos.users.RegisterUserRequestDto;
-import com.codewithmosh.store.dtos.users.UpdateUserRequest;
-import com.codewithmosh.store.dtos.users.UserDto;
-import com.codewithmosh.store.entities.User;
-import com.codewithmosh.store.exceptions.auth.EmailAlreadyExists;
-import com.codewithmosh.store.mappers.UserMapper;
-import com.codewithmosh.store.repositories.UserRepository;
-import com.codewithmosh.store.services.UserService;
+import com.codewithmosh.store.auth.EmailAlreadyExists;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;

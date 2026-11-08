@@ -1,18 +1,13 @@
-package com.codewithmosh.store.services;
+package com.codewithmosh.store.payments;
 
-import com.codewithmosh.store.dtos.CheckoutResponseDto;
 import com.codewithmosh.store.entities.*;
-import com.codewithmosh.store.exceptions.PaymentException;
 import com.codewithmosh.store.exceptions.cart.CartEmptyException;
 import com.codewithmosh.store.exceptions.cart.CartNotFoundException;
 import com.codewithmosh.store.repositories.CartRepository;
 import com.codewithmosh.store.repositories.OrderRepository;
-import com.codewithmosh.store.repositories.UserRepository;
-import com.stripe.exception.SignatureVerificationException;
-import com.stripe.model.PaymentIntent;
-import com.stripe.net.Webhook;
+import com.codewithmosh.store.users.User;
+import com.codewithmosh.store.users.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
