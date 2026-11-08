@@ -1,29 +1,28 @@
 package com.codewithmosh.store.auth;
 
+import com.codewithmosh.store.common.UserNotFound;
 import com.codewithmosh.store.users.UserDto;
-import com.codewithmosh.store.users.User;
 import com.codewithmosh.store.users.UserMapper;
 import com.codewithmosh.store.users.UserRepository;
 import com.codewithmosh.store.services.Jwt;
 import com.codewithmosh.store.services.JwtService;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController //Serialize/Deserialization between Java objects and JSON
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
+    private final AuthService authService;
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -38,28 +37,17 @@ public class AuthController {
             for protected (authenticated) endpoints
             This is not session based, so it is stateless and token based authentication
          */
+        LoginResponse loginResponse = authService.handleLogin(loginRequest.getEmail(), loginRequest.getPassword());
+        Jwt accessToken = loginResponse.getAccessToken();
+        Jwt refreshToken = loginResponse.getRefreshToken();
 
-        Authentication authentication = new UsernamePasswordAuthenticationToken
-                                        (loginRequest.getEmail(), loginRequest.getPassword());
-
-        authenticationManager.authenticate(authentication); //throws BadCredentialsException at runtime.
-
-        User user = userRepository.findByEmail(loginRequest.getEmail()).orElse(null);
-        if (user==null) return ResponseEntity.badRequest().build(); //should never happen because authenticationManager should be throwing and we never get here then
-
-        Jwt accessToken = jwtService.generateAccessToken(user);
-        Jwt refershToken = jwtService.generateRefreshToken(user);
-
-
-
-        Cookie cookie = new Cookie("refreshToken", refershToken.toString());
+        Cookie cookie = new Cookie("refreshToken", refreshToken.toString());
         cookie.setHttpOnly(true); //cannot be accessed by js
         cookie.setPath("/auth/refresh"); //where cookie can be sent to
         cookie.setMaxAge(jwtConfig.getRefreshTokenExpirationInSeconds()); //7 days (copied from jwtService::generateRefreshToken)
         cookie.setSecure(true); //https only; http blocked
 
         response.addCookie(cookie);
-
 
         return ResponseEntity.ok(new JwtResponse(accessToken.toString()));
     }
@@ -68,48 +56,34 @@ public class AuthController {
     public ResponseEntity<JwtResponse> refreshAccessToken(
             @CookieValue(value = "refreshToken") String refreshToken
     ){
-        try {
-            Jwt jwt = jwtService.parse(refreshToken);
-            if (!jwt.isUnexpired()) return ResponseEntity.badRequest().build();
-            Long userId = Long.valueOf(jwt.getSubject().toString());
-            User user = userRepository.findById(userId).orElseThrow(); //maybe user was deleted from the table in the schema
-            Jwt refreshedAccessToken = jwtService.generateAccessToken(user);
-            return ResponseEntity.ok(new JwtResponse(refreshedAccessToken.toString()));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        Jwt refreshedAccessToken = authService.handleRefreshAccessToken(refreshToken);
+        return ResponseEntity.ok(new JwtResponse(refreshedAccessToken.toString()));
     }
 
     @PostMapping("/validate")
-    public ResponseEntity<Void> validateJwt(@RequestHeader(name = "Authorization") String token){
-        token = token.replace("Bearer ", "");
-        Jwt jwt = null;
-        try {
-            jwt = jwtService.parse(token);
-            boolean valid = jwt.isUnexpired();
-            if (valid) return ResponseEntity.ok().build();
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public ResponseEntity<Void> validateJwt(@RequestHeader(name = "Authorization") String authHeader){
+        String token = authHeader.replace("Bearer ", "");
+        if (authService.handleValidJwt(token)) return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @GetMapping("/me")
     public ResponseEntity<UserDto> me(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        Long userId = Long.valueOf(authentication.getPrincipal().toString()); //we know because we set this
-
-        User user = userRepository.findById(userId).orElse(null);
-
-        //if user not found -> someone got a valid jwtToken without being registered in the users table in store_api schema
-        if (user==null) return ResponseEntity.notFound().build();
-
-        return ResponseEntity.ok(userMapper.toDto(user));
+        UserDto userDto = authService.handleMe();
+        return ResponseEntity.ok(userDto);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Void> handleBadCredentials(BadCredentialsException exception){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<Map<String,String>> handleJwtException(JwtException exception){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("Error", exception.getMessage()));
+    }
+
+    @ExceptionHandler(UserNotFound.class)
+    public ResponseEntity<Void> handleUserNotFound(){
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
