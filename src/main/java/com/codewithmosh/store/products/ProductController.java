@@ -10,14 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("products")
+@RequestMapping("/products")
 @AllArgsConstructor
 public class ProductController {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
     private final CategoryRepository categoryRepository;
 
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<List<ProductDto>> getAllProducts(@RequestParam(name = "categoryId", required = false, defaultValue = "-1") Long categoryId ){
         List<Product> products;
         if (categoryId!=-1)

@@ -44,7 +44,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(customizer ->
                         customizer
                                   .requestMatchers("/carts/**").permitAll()
+                                  .requestMatchers("/swagger-ui/**").permitAll()
+                                  .requestMatchers("/swagger-ui.html").permitAll()
+                                  .requestMatchers("/v3/api-docs/**").permitAll()
                                   .requestMatchers(HttpMethod.POST,"/users").permitAll()
+                                  .requestMatchers(HttpMethod.GET,"/products/**").permitAll()
+                                  .requestMatchers(HttpMethod.POST,"/products/**").hasRole(Role.ADMIN.name())
+                                  .requestMatchers(HttpMethod.PUT,"/products/**").hasRole(Role.ADMIN.name())
+                                  .requestMatchers(HttpMethod.DELETE,"/products/**").hasRole(Role.ADMIN.name())
                                   .requestMatchers("/users").hasRole(Role.ADMIN.name())
                                   .requestMatchers("/admin/**").hasRole(Role.ADMIN.name())
                                   .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
