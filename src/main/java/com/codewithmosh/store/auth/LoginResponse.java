@@ -1,9 +1,7 @@
 package com.codewithmosh.store.auth;
 
-import com.codewithmosh.store.services.Jwt;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 
 @AllArgsConstructor
 @Data

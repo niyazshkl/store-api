@@ -1,6 +1,5 @@
-package com.codewithmosh.store.services;
+package com.codewithmosh.store.auth;
 
-import com.codewithmosh.store.entities.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 

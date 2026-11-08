@@ -1,6 +1,5 @@
-package com.codewithmosh.store.services;
+package com.codewithmosh.store.auth;
 
-import com.codewithmosh.store.auth.JwtConfig;
 import com.codewithmosh.store.users.User;
 import io.jsonwebtoken.*;
 import lombok.AllArgsConstructor;

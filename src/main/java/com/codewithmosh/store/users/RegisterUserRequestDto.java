@@ -1,6 +1,6 @@
 package com.codewithmosh.store.users;
 
-import com.codewithmosh.store.validation.Lowercase;
+import com.codewithmosh.store.common.validation.Lowercase;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 

@@ -4,8 +4,6 @@ import com.codewithmosh.store.common.UserNotFound;
 import com.codewithmosh.store.users.UserDto;
 import com.codewithmosh.store.users.UserMapper;
 import com.codewithmosh.store.users.UserRepository;
-import com.codewithmosh.store.services.Jwt;
-import com.codewithmosh.store.services.JwtService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;

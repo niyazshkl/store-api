@@ -1,6 +1,6 @@
 package com.codewithmosh.store.config;
 
-import com.codewithmosh.store.entities.Role;
+import com.codewithmosh.store.auth.Role;
 import com.codewithmosh.store.auth.JwtFilter;
 import lombok.AllArgsConstructor;
 import org.springdoc.core.customizers.DataRestDelegatingMethodParameterCustomizer;

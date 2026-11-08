@@ -1,8 +1,6 @@
 package com.codewithmosh.store.auth;
 
 import com.codewithmosh.store.common.UserNotFound;
-import com.codewithmosh.store.services.Jwt;
-import com.codewithmosh.store.services.JwtService;
 import com.codewithmosh.store.users.User;
 import com.codewithmosh.store.users.UserDto;
 import com.codewithmosh.store.users.UserMapper;

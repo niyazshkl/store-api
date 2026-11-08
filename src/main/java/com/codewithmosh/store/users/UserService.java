@@ -1,15 +1,12 @@
 package com.codewithmosh.store.users;
 
 import com.codewithmosh.store.common.UserNotFound;
-import com.codewithmosh.store.entities.Role;
+import com.codewithmosh.store.auth.Role;
 import com.codewithmosh.store.auth.EmailAlreadyExists;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.HashSet;
 import java.util.Set;
