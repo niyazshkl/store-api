@@ -145,6 +145,17 @@
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
                 <version>10.15.0</version>
+                <configuration>
+                    <!-- Ensure to run and set values for these in the terminal before running mvn flyway:clean|migrate|etc
+                    1. export DB_URL=
+                    2. export DB_USER=
+                    2. export DB_PASSWORD=
+                    -->
+                    <url>${env.DB_URL}</url>
+                    <user>${env.DB_USER}</user>
+                    <password>${env.DB_PASSWORD}</password>
+                    <cleanDisabled>false</cleanDisabled>
+                </configuration>
             </plugin>
 <!--            This is needed for production because otherwise annotations will be missing-->
             <plugin>
