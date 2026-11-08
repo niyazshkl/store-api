@@ -1,4 +1,4 @@
-package com.codewithmosh.store.dtos.users;
+package com.codewithmosh.store.users;
 
 import lombok.Data;
 
