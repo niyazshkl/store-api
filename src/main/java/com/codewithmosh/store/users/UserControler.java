@@ -1,6 +1,7 @@
 package com.codewithmosh.store.users;
 
 import com.codewithmosh.store.auth.EmailAlreadyExists;
+import com.codewithmosh.store.common.UserNotFound;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -23,25 +24,19 @@ public class UserControler {
     private final UserService userService;
 
     @GetMapping
-    public Iterable<UserDto> getAllUsers(@RequestParam(required = false, defaultValue = "", name = "sort") String sortBy){
-        Set<String> validNames = new HashSet<>();
-        validNames.add("name");
-        validNames.add("email");
-        if (!validNames.contains(sortBy)) sortBy = "name";
-        return userRepository.findAll(Sort.by(sortBy)).stream()
-                .map(userMapper::toDto).toList();
+    public ResponseEntity<Iterable<UserDto>> getAllUsers(@RequestParam(required = false, defaultValue = "", name = "sort") String sortBy){
+        Iterable<UserDto> users = userService.getAllUsers(sortBy);
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUser(@PathVariable Long id){
-        User user =  userRepository.findById(id).orElse(null);
-        if (user==null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(userMapper.toDto(user));
+        return ResponseEntity.ok(userService.getUser(id));
     }
 
     @PostMapping
     // MethodArgumentNotValidException
-    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterUserRequestDto registerUserRequestDto,
+    public ResponseEntity<UserDto> registerUser(@Valid @RequestBody RegisterUserRequestDto registerUserRequestDto,
                                                 UriComponentsBuilder uriComponentsBuilder){
         UserDto userDto = userService.registerUser(registerUserRequestDto.getName(), registerUserRequestDto.getEmail(), registerUserRequestDto.getPassword());
         URI uri = uriComponentsBuilder.path("/users/{id}").buildAndExpand(userDto.getId()).toUri();
@@ -51,30 +46,18 @@ public class UserControler {
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable(name = "id") Long id,
                               @RequestBody UpdateUserRequest updateUserRequest){
-        User user = userRepository.findById(id).orElse(null);
-        if (user==null) return ResponseEntity.notFound().build();
-        userMapper.update(updateUserRequest, user);
-        userRepository.save(user);
-        UserDto userDto = userMapper.toDto(user);
-
-        return ResponseEntity.ok(userDto);
+        return ResponseEntity.ok(userService.updateUser(id, updateUserRequest));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable(name = "id") Long id){
-        User user = userRepository.findById(id).orElse(null);
-        if (user==null) return ResponseEntity.notFound().build();
-        userRepository.delete(user);
+        userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
     @PostMapping("/{id}/change-password")
     public ResponseEntity<Void> changePassword(@PathVariable Long id,
-                                               @RequestBody ChangePasswordRequestDto changePasswordRequestDto){
-        User user = userRepository.findById(id).orElse(null);
-        if (user==null) return ResponseEntity.notFound().build();
-        if (!user.getPassword().equals(changePasswordRequestDto.getOldPassword())) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        user.setPassword(changePasswordRequestDto.getNewPassword());
-        userRepository.save(user);
+                                              @Valid @RequestBody ChangePasswordRequestDto changePasswordRequestDto){
+        userService.changePassword(id, changePasswordRequestDto.getOldPassword(), changePasswordRequestDto.getNewPassword());
         return ResponseEntity.noContent().build();
     }
 
@@ -83,6 +66,15 @@ public class UserControler {
         return ResponseEntity.badRequest().body(
                 Map.of("email", "Email is already registered")
         );
+    }
+    @ExceptionHandler(UserNotFound.class)
+    public ResponseEntity<Void> handleUserNotFound(){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    @ExceptionHandler(OldPasswordMismatchException.class)
+    public ResponseEntity<Map<String,String>> handleOldPasswordMismatch(OldPasswordMismatchException exception){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("Password incorrect", "Old password is incorrect"));
     }
 
 }

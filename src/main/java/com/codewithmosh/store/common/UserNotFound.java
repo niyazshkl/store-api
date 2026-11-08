@@ -1,4 +1,4 @@
-package com.codewithmosh.store.auth;
+package com.codewithmosh.store.common;
 
 import lombok.NoArgsConstructor;
 
