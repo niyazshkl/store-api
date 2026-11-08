@@ -1,10 +1,10 @@
 package com.codewithmosh.store.entities;
 
+import com.codewithmosh.store.products.Product;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 
 import java.math.BigDecimal;
 import java.util.Date;

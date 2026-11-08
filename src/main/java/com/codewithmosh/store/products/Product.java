@@ -1,10 +1,10 @@
-package com.codewithmosh.store.entities;
+package com.codewithmosh.store.products;
 
+import com.codewithmosh.store.entities.Category;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.Set;
 
 @Getter
 @Setter
