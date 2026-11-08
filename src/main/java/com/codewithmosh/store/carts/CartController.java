@@ -1,13 +1,5 @@
-package com.codewithmosh.store.controllers;
+package com.codewithmosh.store.carts;
 
-import com.codewithmosh.store.dtos.carts.AddItemToCartRequest;
-import com.codewithmosh.store.dtos.carts.CartDto;
-import com.codewithmosh.store.dtos.carts.CartItemDto;
-import com.codewithmosh.store.dtos.carts.UpdateCartItemRequestDto;
-import com.codewithmosh.store.exceptions.cart.CartItemNotFoundException;
-import com.codewithmosh.store.exceptions.cart.CartNotFoundException;
-import com.codewithmosh.store.exceptions.cart.ProductNotFoundException;
-import com.codewithmosh.store.services.CartService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

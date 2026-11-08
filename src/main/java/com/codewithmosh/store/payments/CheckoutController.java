@@ -1,7 +1,7 @@
 package com.codewithmosh.store.payments;
 
-import com.codewithmosh.store.exceptions.cart.CartEmptyException;
-import com.codewithmosh.store.exceptions.cart.CartNotFoundException;
+import com.codewithmosh.store.carts.CartEmptyException;
+import com.codewithmosh.store.carts.CartNotFoundException;
 import com.codewithmosh.store.repositories.OrderRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

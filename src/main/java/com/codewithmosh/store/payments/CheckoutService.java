@@ -1,9 +1,7 @@
 package com.codewithmosh.store.payments;
 
+import com.codewithmosh.store.carts.*;
 import com.codewithmosh.store.entities.*;
-import com.codewithmosh.store.exceptions.cart.CartEmptyException;
-import com.codewithmosh.store.exceptions.cart.CartNotFoundException;
-import com.codewithmosh.store.repositories.CartRepository;
 import com.codewithmosh.store.repositories.OrderRepository;
 import com.codewithmosh.store.users.User;
 import com.codewithmosh.store.users.UserRepository;
