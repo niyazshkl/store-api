@@ -15,4 +15,4 @@ stripe:
   secret: ${STRIPE_SECRET}
   webhookSecretKey: ${STRIPE_WEBHOOK_SECRET_KEY}
 website:
-  url: https://localhost:3000/
+  url: https://localhost:3000

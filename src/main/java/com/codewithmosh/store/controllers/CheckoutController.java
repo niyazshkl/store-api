@@ -45,42 +45,10 @@ public class CheckoutController {
 
     @PostMapping("/webhook")
     public ResponseEntity<Void> handleWebhook(
-            @RequestHeader("Stripe-signature") String signature,
+            @RequestHeader Map<String,String> headers,
             @RequestBody String payload){
-
-        try {
-            var event = Webhook.constructEvent(payload,signature,webhookSecretKey);
-            System.out.println(event.getType());
-
-            var stripeObject = event.getDataObjectDeserializer().getObject().orElse(null);
-
-            switch (event.getType()){
-                case "payment_intent.succeeded" -> {
-                    //update order status to PAID
-                    PaymentIntent paymentIntent = (PaymentIntent) stripeObject;
-                    if (paymentIntent!=null){
-                        String orderId = paymentIntent.getMetadata().get("orderId");
-                        Order order =  orderRepository.findById(Long.valueOf(orderId)).orElse(null);
-                        order.setStatus(OrderStatus.PAID);
-                        orderRepository.save(order);
-                    }
-                }
-                case "payment_intent.failed" -> {
-                    //update order status to FAILED
-                    PaymentIntent paymentIntent = (PaymentIntent) stripeObject;
-                    if (paymentIntent!=null){
-                        String orderId = paymentIntent.getMetadata().get("orderId");
-                        Order order =  orderRepository.findById(Long.valueOf(orderId)).orElse(null);
-                        order.setStatus(OrderStatus.FAILED);
-                        orderRepository.save(order);
-                    }
-                }
-            }
-            return ResponseEntity.ok().build();
-
-        } catch (SignatureVerificationException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        checkoutService.handleWebhookEvent(headers,payload);
+        return ResponseEntity.ok().build();
     }
     @ExceptionHandler(PaymentException.class)
     public ResponseEntity<Map<String,String>> handlePaymentException(PaymentException exception){

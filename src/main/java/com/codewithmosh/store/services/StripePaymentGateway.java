@@ -2,21 +2,39 @@ package com.codewithmosh.store.services;
 
 import com.codewithmosh.store.entities.Order;
 import com.codewithmosh.store.entities.OrderItem;
+import com.codewithmosh.store.entities.OrderStatus;
 import com.codewithmosh.store.exceptions.PaymentException;
+import com.codewithmosh.store.repositories.OrderRepository;
+import com.codewithmosh.store.repositories.UserRepository;
+import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
+import com.stripe.model.Event;
+import com.stripe.model.PaymentIntent;
 import com.stripe.model.checkout.Session;
+import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
+import lombok.RequiredArgsConstructor;
+import org.hibernate.boot.model.internal.OptionalDeterminationSecondPass;
 import org.hibernate.query.NativeQuery;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class StripePaymentGateway implements PaymentGateway{
+
+    private final OrderRepository orderRepository;
 
     @Value("${website.url}")
     private String websiteUrl;
+
+    @Value("${stripe.webhookSecretKey}")
+    private String webhookSecretKey;
 
     @Override
     public CheckoutSession createCheckoutSession(Order order) {
@@ -41,7 +59,46 @@ public class StripePaymentGateway implements PaymentGateway{
         }
     }
 
-    private static SessionCreateParams.LineItem createLineItem(OrderItem item) {
+    @Override
+    public Optional<PaymentResult> parseWebhookRequest(Map<String, String> headers, String payload) throws PaymentException {
+        try {
+
+            String signature = headers.get("stripe-signature");
+
+            var event = Webhook.constructEvent(payload,signature,webhookSecretKey);
+
+            var stripeObject = event.getDataObjectDeserializer().getObject().orElse(null);
+
+            switch (event.getType()){
+                case "payment_intent.succeeded" -> {
+                    //update order status to PAID
+                    PaymentIntent paymentIntent = (PaymentIntent) stripeObject;
+                    if (paymentIntent!=null){
+                        String orderId = paymentIntent.getMetadata().get("orderId");
+                        PaymentResult paymentResult = new PaymentResult(Long.valueOf(orderId), PaymentStatus.PAYMENT_INTENT_SUCCEEDED);
+                        return Optional.of(paymentResult);
+                    }
+                }
+                case "payment_intent.payment_failed" -> {
+                    //update order status to FAILED
+                    PaymentIntent paymentIntent = (PaymentIntent) stripeObject;
+                    if (paymentIntent!=null){
+                        String orderId = paymentIntent.getMetadata().get("orderId");
+                        PaymentResult paymentResult = new PaymentResult(Long.valueOf(orderId), PaymentStatus.PAYMENT_INTENT_PAYMENT_FAILED);
+                        return Optional.of(paymentResult);
+                    }
+                }
+            }
+
+        } catch (SignatureVerificationException e) {
+            throw new PaymentException();
+        }
+        return Optional.empty();
+    }
+
+
+
+    private SessionCreateParams.LineItem createLineItem(OrderItem item) {
         return SessionCreateParams.LineItem.builder()
                 .setQuantity(Long.valueOf(item.getQuantity()))
                 .setPriceData(
@@ -49,7 +106,7 @@ public class StripePaymentGateway implements PaymentGateway{
                 ).build();
     }
 
-    private static SessionCreateParams.LineItem.PriceData createPriceData(OrderItem item) {
+    private SessionCreateParams.LineItem.PriceData createPriceData(OrderItem item) {
         return SessionCreateParams.LineItem.PriceData.builder()
                 .setCurrency("usd")
                 .setUnitAmountDecimal(item.getUnitPrice().multiply(BigDecimal.valueOf(100)))
@@ -59,7 +116,7 @@ public class StripePaymentGateway implements PaymentGateway{
                 .build();
     }
 
-    private static SessionCreateParams.LineItem.PriceData.ProductData createProductData(OrderItem item) {
+    private SessionCreateParams.LineItem.PriceData.ProductData createProductData(OrderItem item) {
         return SessionCreateParams.LineItem.PriceData.ProductData.builder()
                 .setName(item.getProduct().getName())
                 .build();

@@ -8,11 +8,16 @@ import com.codewithmosh.store.exceptions.cart.CartNotFoundException;
 import com.codewithmosh.store.repositories.CartRepository;
 import com.codewithmosh.store.repositories.OrderRepository;
 import com.codewithmosh.store.repositories.UserRepository;
+import com.stripe.exception.SignatureVerificationException;
+import com.stripe.model.PaymentIntent;
+import com.stripe.net.Webhook;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -88,5 +93,16 @@ public class CheckoutService {
             orderRepository.delete(order);
             throw ex;
         }
+    }
+
+    public void handleWebhookEvent(Map<String,String> headers, String payload) throws PaymentException{
+        PaymentResult paymentResult = paymentGateway.parseWebhookRequest(headers, payload).orElse(null);
+        if (paymentResult.getPaymentStatus()==PaymentStatus.PAYMENT_INTENT_SUCCEEDED) setOrderStatus(Long.valueOf(paymentResult.getOrderId()), OrderStatus.PAID);
+        else setOrderStatus(Long.valueOf(paymentResult.getOrderId()), OrderStatus.FAILED);
+    }
+    private void setOrderStatus(Long orderId, OrderStatus orderStatus) {
+        Order order =  orderRepository.findById(orderId).orElse(null);
+        order.setStatus(orderStatus);
+        orderRepository.save(order);
     }
 }
