@@ -64,7 +64,6 @@ public class User {
 
     public void addOrder(Order order){
         this.orders.add(order);
-        order.setCustomer(this);
     }
 
     public void addFavoriteProduct(Product product) {

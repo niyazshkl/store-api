@@ -22,6 +22,11 @@ public class Order {
     @JoinColumn(name = "customer_id")
     private User customer;
 
+    public void setCustomer(User customer) {
+        this.customer = customer;
+        customer.addOrder(this);
+    }
+
     @Column(name = "status")
     @Enumerated(EnumType.STRING) //store string in db
     private OrderStatus status;

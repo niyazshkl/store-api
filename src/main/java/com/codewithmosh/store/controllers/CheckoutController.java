@@ -2,6 +2,7 @@ package com.codewithmosh.store.controllers;
 
 import com.codewithmosh.store.dtos.CheckoutResponseDto;
 import com.codewithmosh.store.dtos.checkout.RequestCheckoutDto;
+import com.codewithmosh.store.exceptions.PaymentException;
 import com.codewithmosh.store.exceptions.cart.CartEmptyException;
 import com.codewithmosh.store.exceptions.cart.CartNotFoundException;
 import com.codewithmosh.store.services.CheckoutService;
@@ -23,14 +24,12 @@ public class CheckoutController {
     public ResponseEntity<CheckoutResponseDto> checkout(
             @Valid @RequestBody RequestCheckoutDto requestCheckoutDto
             ) {
-        UUID cartId = requestCheckoutDto.getCartId();
-        CheckoutResponseDto checkoutResponseDto = null;
-        try {
-            checkoutResponseDto = checkoutService.checkout(cartId);
-            return  ResponseEntity.ok(checkoutResponseDto);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+            UUID cartId = requestCheckoutDto.getCartId();
+            return  ResponseEntity.ok(checkoutService.checkout(cartId));
+    }
+    @ExceptionHandler(PaymentException.class)
+    public ResponseEntity<Map<String,String>> handlePaymentException(PaymentException exception){
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
     @ExceptionHandler(CartNotFoundException.class)
     public ResponseEntity<Map<String,String>> handleCartNotFound(CartNotFoundException exception){
