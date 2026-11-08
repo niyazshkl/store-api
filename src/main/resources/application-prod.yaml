@@ -1,0 +1,6 @@
+#All production environment specific settings
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL} #no username and password because they should be included in this url & publicly on gitHub repo
+website:
+  url: https://mystore.com #just made it up
