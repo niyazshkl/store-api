@@ -1,12 +1,6 @@
-package com.codewithmosh.store.services;
+package com.codewithmosh.store.orders;
 
-import com.codewithmosh.store.dtos.orders.OrderDto;
-import com.codewithmosh.store.entities.Order;
 import com.codewithmosh.store.users.User;
-import com.codewithmosh.store.exceptions.order.OrderNotFound;
-import com.codewithmosh.store.exceptions.order.UserDoesNotOwnOrder;
-import com.codewithmosh.store.mappers.OrderMapper;
-import com.codewithmosh.store.repositories.OrderRepository;
 import com.codewithmosh.store.users.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;

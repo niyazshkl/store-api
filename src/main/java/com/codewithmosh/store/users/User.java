@@ -1,7 +1,7 @@
 package com.codewithmosh.store.users;
 
 import com.codewithmosh.store.entities.Address;
-import com.codewithmosh.store.entities.Order;
+import com.codewithmosh.store.orders.Order;
 import com.codewithmosh.store.products.Product;
 import com.codewithmosh.store.entities.Role;
 import jakarta.persistence.*;

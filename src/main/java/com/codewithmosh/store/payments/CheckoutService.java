@@ -1,11 +1,12 @@
 package com.codewithmosh.store.payments;
 
 import com.codewithmosh.store.carts.*;
-import com.codewithmosh.store.entities.*;
-import com.codewithmosh.store.repositories.OrderRepository;
+import com.codewithmosh.store.orders.Order;
+import com.codewithmosh.store.orders.OrderRepository;
 import com.codewithmosh.store.users.User;
 import com.codewithmosh.store.users.UserRepository;
 import lombok.RequiredArgsConstructor;
+import com.codewithmosh.store.orders.OrderStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

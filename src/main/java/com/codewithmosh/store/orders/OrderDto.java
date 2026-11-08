@@ -1,6 +1,5 @@
-package com.codewithmosh.store.dtos.orders;
+package com.codewithmosh.store.orders;
 
-import com.codewithmosh.store.entities.OrderStatus;
 import lombok.Data;
 
 import java.math.BigDecimal;
