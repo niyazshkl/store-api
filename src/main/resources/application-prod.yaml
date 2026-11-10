@@ -4,3 +4,5 @@ spring:
     url: ${SPRING_DATASOURCE_URL} #no username and password because they should be included in this url & publicly on gitHub repo
 website:
   url: https://mystore.com #just made it up
+server:
+  forward-headers-strategy: framework
